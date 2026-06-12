@@ -1,5 +1,6 @@
-import type { Choice, ChoiceId } from "../types/exercise";
+import type { Choice, ChoiceId, ChoiceType } from "../types/exercise";
 import GeoGebraRenderer from "./GeoGebraRenderer";
+import LatexText from "./LatexText";
 
 interface ExerciseCardProps {
   choice: Choice;
@@ -11,6 +12,7 @@ interface ExerciseCardProps {
   exerciseId: string;
   coordSystem?: [number, number, number, number];
   appName?: string;
+  choiceType: ChoiceType;
 }
 
 export default function ExerciseCard({
@@ -23,6 +25,7 @@ export default function ExerciseCard({
   exerciseId,
   coordSystem,
   appName,
+  choiceType,
 }: ExerciseCardProps) {
   let cardClass = "bg-white border-2 border-transparent shadow-md hover:shadow-xl hover:-translate-y-1";
   let labelClass = "text-slate-400 bg-slate-50";
@@ -38,6 +41,9 @@ export default function ExerciseCard({
     labelClass = "text-slate-300 bg-slate-50";
   }
 
+  const isFigureMode = choiceType === "figure";
+  const labelText = isFigureMode ? `Figure ${label}` : `Réponse ${label}`;
+
   return (
     <button
       onClick={onClick}
@@ -50,19 +56,28 @@ export default function ExerciseCard({
       `}
     >
       <div className={`mb-3 px-4 py-1.5 text-sm font-semibold tracking-wide transition-colors ${labelClass}`}>
-        Figure {label}
+        {labelText}
       </div>
-      <div className="overflow-hidden bg-white">
-        <GeoGebraRenderer
-          key={`${exerciseId}-${label}`}
-          containerId={`ggb-${exerciseId}-${label}`}
-          commands={choice.construction_commands}
-          width={240}
-          height={240}
-          coordSystem={coordSystem}
-          appName={appName}
-        />
-      </div>
+
+      {isFigureMode ? (
+        <div className="overflow-hidden bg-white">
+          <GeoGebraRenderer
+            key={`${exerciseId}-${label}`}
+            containerId={`ggb-${exerciseId}-${label}`}
+            commands={choice.construction_commands}
+            width={240}
+            height={240}
+            coordSystem={coordSystem}
+            appName={appName}
+          />
+        </div>
+      ) : (
+        <div className="flex items-center justify-center min-h-[140px] w-[240px] px-4 py-6 bg-white">
+          <LatexText className="text-lg font-medium text-slate-800 text-center">
+            {choice.latex ? `$${choice.latex}$` : ""}
+          </LatexText>
+        </div>
+      )}
     </button>
   );
 }

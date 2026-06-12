@@ -8,10 +8,11 @@ interface Topic {
 }
 
 const TOPICS: Topic[] = [
-  { id: "equation_droite", label: "Droites affines", shortLabel: "Droites", hasLevel2: false },
-  { id: "cercle", label: "Cercles", shortLabel: "Cercles", hasLevel2: false },
-  { id: "pythagore", label: "Théorème de Pythagore", shortLabel: "Pythagore", hasLevel2: true },
-  { id: "thales", label: "Théorème de Thalès", shortLabel: "Thalès", hasLevel2: true },
+  { id: "geometrie_repere", label: "Géométrie repérée (distance, milieu, projeté)", shortLabel: "Géométrie repérée", hasLevel2: true },
+  { id: "vecteurs", label: "Vecteurs et colinéarité", shortLabel: "Vecteurs", hasLevel2: true },
+  { id: "equation_droite", label: "Équations de droites (réduite, cartésienne, graphique)", shortLabel: "Droites", hasLevel2: true },
+  { id: "positions_relatives", label: "Positions relatives de droites", shortLabel: "Positions relatives", hasLevel2: true },
+  { id: "ia", label: "Exercices générés par IA (Mistral)", shortLabel: "IA ✨", hasLevel2: true },
 ];
 
 interface TopicSelectorProps {
@@ -51,7 +52,7 @@ export default function TopicSelector({
         })}
       </div>
 
-      {/* Sélection du niveau (affiché seulement si le sujet a un niveau 2) */}
+      {/* Sélection du niveau */}
       {activeTopic.hasLevel2 && (
         <div className="flex gap-2 items-center">
           <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">Niveau</span>

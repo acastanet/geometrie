@@ -1,5 +1,5 @@
   # API Z.ai personnalisée
-  claude --settings .claude/zai-settings.json
+  claude --settings ds-settings.json
 
   # Configuration par défaut
   claude --settings .claude/claude-settings.json  
