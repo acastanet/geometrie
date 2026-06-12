@@ -26,7 +26,7 @@ export async function callMistral(
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "mistral-small-latest",
+      model: "mistral-large-latest",
       messages,
       response_format: { type: "json_object" },
       random_seed: seed,

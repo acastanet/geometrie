@@ -11,7 +11,7 @@ const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT ?? 3001;
-const MAX_RETRIES = 2;
+const MAX_RETRIES = 3;
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -76,6 +76,7 @@ app.post("/api/generate", async (req, res) => {
       } catch {
         lastError = "JSON invalide — le LLM n'a pas retourné du JSON parseable";
         console.error(`[retry ${attempt}] ${lastError}`);
+        console.error(`[retry ${attempt}] Raw (300 premiers caractères): ${rawJson.slice(0, 300)}`);
         continue;
       }
 
@@ -83,7 +84,8 @@ app.post("/api/generate", async (req, res) => {
       const validated = validateLlmResponse(parsed);
       if (typeof validated === "string") {
         lastError = validated;
-        console.error(`[retry ${attempt}] Validation structurelle échouée : ${validated}`);
+        console.error(`[retry ${attempt}] Validation échouée : ${validated}`);
+        console.error(`[retry ${attempt}] JSON reçu : ${JSON.stringify(parsed).slice(0, 500)}`);
         continue;
       }
 
