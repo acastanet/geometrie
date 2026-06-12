@@ -1,0 +1,17 @@
+  # API Z.ai personnalisée
+  claude --settings .claude/zai-settings.json
+
+  # Configuration par défaut
+  claude --settings .claude/claude-settings.json  
+
+  claude --settings .claude/anti-settings.json  
+
+
+  # Configuration par défaut
+  claude --settings .claude/claude-settings.json  
+
+"C:\DEV_ALX\AnSu\ansu_forge\.claude\zai-settings.json"
+"C:\DEV_ALX\AnSu\ansu_forge\.claude\anti_gemini-settings.json"
+"C:\DEV_ALX\AnSu\ansu_forge\.claude\anti_claude-settings.json"
+"C:\DEV_ALX\AnSu\ansu_forge\.claude\settings.local.json"
+"C:\DEV_ALX\AnSu\ansu_forge\.claude\claude-settings.json"
