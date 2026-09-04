@@ -39,7 +39,7 @@ export async function generateLlmExercise(
   difficulty: 1 | 2,
   signal?: AbortSignal
 ): Promise<Exercise> {
-  const resp = await fetch("/api/generate", {
+  const resp = await fetch("/mimo/api/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ seed, difficulty }),

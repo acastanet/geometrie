@@ -30,7 +30,7 @@ export async function callMistral(
       messages,
       response_format: { type: "json_object" },
       random_seed: seed,
-      temperature: 0.7,
+      temperature: 0.3,
       max_tokens: 2000,
     }),
     signal: signal ?? AbortSignal.timeout(30_000),

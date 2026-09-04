@@ -175,6 +175,10 @@ Tu crées des exercices de type QCM (3 choix) conformes au programme français.
 4. **LaTeX** : ne JAMAIS utiliser de délimiteurs $ dans les champs latex (ils sont ajoutés par l'UI). Le LaTeX doit être pur : \\\\vec{AB}, \\\\frac{1}{2}, \\\\sqrt{40}, etc.
 5. **Format JSON** : respecte EXACTEMENT la structure ci-dessous.
 6. **Distracteurs crédibles** : chaque choix incorrect doit correspondre à une erreur d'élève classique (inversion de signe, oubli de diviser par 2, confusion milieu/somme…).
+7. **ANTI-PATTERNS INTERDITS** :
+   - Ne JAMAIS retourner "data": {"points": {}} — chaque type d'exercice nécessite des points spécifiques listés dans le catalogue.
+   - Ne JAMAIS concaténer plusieurs valeurs dans un champ "value" sauf pour distance_comparaison en mode comparaison.
+   - Pour distance_comparaison simple (un seul segment), mettre UNIQUEMENT distance_AB:sqrt(n) sans ajouter de deuxième distance.
 
 ## Catalogue des scénarios
 
@@ -226,7 +230,7 @@ ${catalogStr}
 
 La valeur machine-readable doit respecter EXACTEMENT l'un de ces formats :
 - **milieu_symetrique** : "milieu:<x>,<y>" ou "symetrique:<x>,<y>"
-- **distance_comparaison** : "distance_AB:sqrt(<n>)" où n est un entier (ex: "distance_AB:sqrt(40)")
+- **distance_comparaison** : Pour un calcul simple → "distance_AB:sqrt(<n>)" (ex: "distance_AB:sqrt(40)"). Pour une comparaison de deux distances → "distance_AB:sqrt(<n1>),distance_CD:sqrt(<n2>)" (ex: "distance_AB:sqrt(40),distance_CD:sqrt(25)"). Si le carré est un carré parfait (25, 36, 49, 64, 100), utiliser l'entier directement (ex: "distance_AB:5")
 - **nature_triangle** : "nature:<verdict>" où verdict ∈ {rectangle_en_A, rectangle_en_B, rectangle_en_C, isocele_en_A, isocele_en_B, isocele_en_C, equilateral, quelconque}
 - **est_parallelogramme** : "parallelogramme:<oui|non>"
 - **quatrieme_sommet** : "sommet_D:<x>,<y>"
@@ -264,7 +268,15 @@ Niveau : ${difficulty === 1 ? "Découverte (milieu, distance, coordonnées)" : "
     prompt += `\n## ATTENTION — Tentative précédente rejetée\n\nL'exercice précédent a été rejeté pour la raison suivante : **${retryReason}**\n\nCorrige ce problème impérativement.`;
   }
 
-  prompt += `\nRéponds UNIQUEMENT avec l'objet JSON. Pas de texte avant ou après.`;
+  prompt += `\n## Checklist avant de répondre
+- [ ] data.points contient TOUS les points requis par le type d'exercice choisi
+- [ ] Les coordonnées sont des entiers entre −6 et 6
+- [ ] Tous les points sont deux à deux distincts
+- [ ] Le choix marqué is_correct: true est mathématiquement juste
+- [ ] Les deux distracteurs ont des misconception_id, indice et correction
+- [ ] Le champ value respecte EXACTEMENT le format canonique spécifié
+
+Réponds UNIQUEMENT avec l'objet JSON. Pas de texte avant ou après.`;
 
   return prompt;
 }

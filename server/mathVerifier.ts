@@ -73,11 +73,19 @@ function computeCorrectValue(
       const B = points["B"];
       if (!A || !B) throw new Error("Points A et B requis pour distance_comparaison");
       const ab2 = (A[0] - B[0]) ** 2 + (A[1] - B[1]) ** 2;
-      const sqrt = Math.sqrt(ab2);
-      if (Number.isInteger(sqrt)) {
-        return `distance_AB:${sqrt}`;
+      const abStr = formatDistanceValue("AB", ab2);
+
+      // Si C est présent, l'exercice compare deux distances
+      const C = points["C"];
+      if (C) {
+        const D = points["D"];
+        if (!D) throw new Error("Point D requis pour comparaison de distances (C présent mais D absent)");
+        const cd2 = (C[0] - D[0]) ** 2 + (C[1] - D[1]) ** 2;
+        const cdStr = formatDistanceValue("CD", cd2);
+        return `${abStr},${cdStr}`;
       }
-      return `distance_AB:sqrt(${ab2})`;
+
+      return abStr;
     }
 
     case "nature_triangle": {
@@ -179,9 +187,105 @@ function computeCorrectValue(
   }
 }
 
-/** Compare deux values canoniques (égalité exacte, sans comparaison de LaTeX) */
+/**
+ * Compare deux values canoniques en normalisant les radicaux.
+ * Gère les formats multi-valeurs (séparés par des virgules).
+ * Accepte sqrt(25) et 5 comme équivalents.
+ */
 function valuesMatch(expected: string, actual: string): boolean {
-  return expected.trim() === actual.trim();
+  const expParts = expected.split(",").map((s) => s.trim()).filter(Boolean);
+  const actParts = actual.split(",").map((s) => s.trim()).filter(Boolean);
+
+  if (expParts.length !== actParts.length) return false;
+
+  for (let i = 0; i < expParts.length; i++) {
+    if (!singleValueMatch(expParts[i], actParts[i])) return false;
+  }
+  return true;
+}
+
+/** Compare un segment individuel (ex: "distance_AB:sqrt(25)" vs "distance_AB:5") */
+function singleValueMatch(expected: string, actual: string): boolean {
+  // Extraire le préfixe (avant le dernier ":") et le corps
+  const expColon = expected.lastIndexOf(":");
+  const actColon = actual.lastIndexOf(":");
+
+  if (expColon === -1 || actColon === -1) {
+    return expected.trim() === actual.trim();
+  }
+
+  const expPrefix = expected.slice(0, expColon);
+  const actPrefix = actual.slice(0, actColon);
+  if (expPrefix.trim() !== actPrefix.trim()) return false;
+
+  const expBody = expected.slice(expColon + 1).trim();
+  const actBody = actual.slice(actColon + 1).trim();
+
+  return normalizedEqual(expBody, actBody);
+}
+
+/** Compare deux expressions numériques en normalisant sqrt et fractions */
+function normalizedEqual(a: string, b: string): boolean {
+  // Égalité directe
+  if (a === b) return true;
+
+  const na = parseNumberOrSqrt(a);
+  const nb = parseNumberOrSqrt(b);
+  if (na === null || nb === null) return a === b;
+
+  // Comparer les valeurs numériques avec une petite tolérance
+  return Math.abs(na - nb) < 1e-9;
+}
+
+/** Parse un entier, un décimal, ou sqrt(n) en valeur numérique */
+function parseNumberOrSqrt(s: string): number | null {
+  // sqrt(n) ou sqrt(n)/d
+  const sqrtMatch = s.match(/^sqrt\((\d+)\)(?:\/(\d+))?$/);
+  if (sqrtMatch) {
+    const n = parseInt(sqrtMatch[1], 10);
+    const den = sqrtMatch[2] ? parseInt(sqrtMatch[2], 10) : 1;
+    return Math.sqrt(n) / den;
+  }
+  // Entier ou décimal simple
+  const num = Number(s);
+  if (!isNaN(num)) return num;
+
+  // Fraction simple: "a/b"
+  const fracMatch = s.match(/^(-?\d+)\/(-?\d+)$/);
+  if (fracMatch) {
+    return parseInt(fracMatch[1], 10) / parseInt(fracMatch[2], 10);
+  }
+
+  return null;
+}
+
+/** Formate une valeur de distance (AB² → sqrt(n) ou entier) */
+function formatDistanceValue(label: string, squared: number): string {
+  const sqrt = Math.sqrt(squared);
+  if (Number.isInteger(sqrt)) {
+    return `distance_${label}:${sqrt}`;
+  }
+  // Simplifier le radical : sqrt(52) = 2*sqrt(13)
+  const simplified = simplifyRadical(squared);
+  if (simplified.coeff === 1) {
+    return `distance_${label}:sqrt(${simplified.radicand})`;
+  }
+  return `distance_${label}:${simplified.coeff}*sqrt(${simplified.radicand})`;
+}
+
+/** Simplifie sqrt(n) = coeff * sqrt(radicand) avec radicand sans facteur carré */
+function simplifyRadical(n: number): { coeff: number; radicand: number } {
+  let radicand = n;
+  let coeff = 1;
+  // Essayer les carrés parfaits de 4 à 100
+  const squares = [4, 9, 16, 25, 36, 49, 64, 81, 100];
+  for (const sq of squares.sort((a, b) => b - a)) {
+    while (radicand % sq === 0) {
+      coeff *= Math.sqrt(sq);
+      radicand /= sq;
+    }
+  }
+  return { coeff, radicand };
 }
 
 /** Réduit une fraction (num, den). Le signe est porté par le numérateur. */

@@ -1,0 +1,14 @@
+[Unit]
+Description=mimo — serveur IA génération d'exercices mathématiques
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/ansu-geometrie/mimo
+ExecStart=/usr/bin/npx tsx server/index.ts
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

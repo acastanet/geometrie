@@ -76,6 +76,7 @@ app.post("/api/generate", async (req, res) => {
       } catch {
         lastError = "JSON invalide — le LLM n'a pas retourné du JSON parseable";
         console.error(`[retry ${attempt}] ${lastError}`);
+        console.error(`[retry ${attempt}] Raw LLM response (truncated): ${rawJson.slice(0, 500)}`);
         continue;
       }
 
@@ -84,6 +85,7 @@ app.post("/api/generate", async (req, res) => {
       if (typeof validated === "string") {
         lastError = validated;
         console.error(`[retry ${attempt}] Validation structurelle échouée : ${validated}`);
+        console.error(`[retry ${attempt}] Raw LLM response (truncated): ${rawJson.slice(0, 500)}`);
         continue;
       }
 
@@ -92,6 +94,7 @@ app.post("/api/generate", async (req, res) => {
       if (mathError) {
         lastError = mathError;
         console.error(`[retry ${attempt}] Vérification mathématique échouée : ${mathError}`);
+        console.error(`[retry ${attempt}] Raw LLM response (truncated): ${rawJson.slice(0, 500)}`);
         continue;
       }
 
